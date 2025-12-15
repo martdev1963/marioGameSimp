@@ -1,0 +1,39 @@
+body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(to bottom, #5C94FC, #87CEEB);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+}
+
+.game-container {
+    background: #fff;
+    padding: 3px solid #000;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 4px 8px #000;
+}
+
+.ui {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    min-width: 800px;
+}
+
+#game-area {
+width: 800px;
+height: 400px;
+background: linear-gradient(to bottom, #000, #5C94FC 80%, #228B22 80%, #228B22 100%);
+border: 2px solid #333;
+/*vid_time: 16:23 / 2:12:04*/
+
+
+
+
+}
