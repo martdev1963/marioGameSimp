@@ -68,6 +68,13 @@ overflow: hidden;
     height: 20px;
 }
 
+.platform.floating {
+    background-image: url('https://i.imgur.com/pogC9x5.png');
+    position: absolute;
+    width: 20px;
+    height: 20px;
+}
+
 .platform.blue {
     background-image: url('https://i.imgur.com/fVscIbn.png');
     position: absolute;
@@ -181,12 +188,29 @@ overflow: hidden;
 }
 
 /*vid_time: 25:43 / 2:12:04*/
-.game-over {
+#game-over {
     position: absolute;
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.5);
     border: 3px solid #FFF;
     color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 1000;
+}
+
+#restart-button {
+    margin: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #FF6B6B;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}   
+
+#restart-button:hover {
+    background-color: #FF3B3B;
 }
