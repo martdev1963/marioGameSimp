@@ -163,12 +163,12 @@ function initGame() {
 function loadLevel(levelIndex) {
     if (levelIndex >= levels.length) {
 
-    // showGameOver(true) // Player has completed all levels    
+        showGameOver(true) // Player has completed all levels    
         return // Exit if level index is out of bounds
     }    
 
     // Clear existing game objects
-    //clearLevel() // Implement this function to remove existing game objects from the DOM and reset arrays (this is a function called before loading a new level)
+    clearLevel() // Implement this function to remove existing game objects from the DOM and reset arrays (this is a function called before loading a new level)
 
 
     const level = levels[levelIndex]; // individual level object from levels array
@@ -188,17 +188,23 @@ function loadLevel(levelIndex) {
 
     // create platforms
     level.platforms.forEach((platformData, index) => {
-        const platform = createElement('div', `platform ${platformData.type}`, {  // platformData.type ie; 'ground' or 'floating'...
+        const platform = myCreateElement('div', `platform ${platformData.type}`, {  // platformData.type ie; 'ground' or 'floating'...
             left: platformData.x + 'px',
             top: platformData.y + 'px',
             width: platformData.width + 'px',
             height: platformData.height + 'px' // vid_time: 51:23 / 2:12:04
     })
         gameArea.appendChild(platform);
+        gameObjects.platforms.push({ // add platform object to gameObjects.platforms array
+            element: platform,
+            x: platformData.x,
+            y: platformData.y,
+            width: platformData.width,
+            height: platformData.height,
+            type: platformData.type,
+            id: 'platform-' + index
+        });
     }); // END of forEach platform loop
-
-
-
 
 
 } // END of loadLevel function
@@ -209,6 +215,45 @@ function updateElementPosition(element, x, y) {
     element.style.left = x + 'px';
     element.style.top = y + 'px';
 }
+
+
+// Function to create a DOM element with specified tag, class, and styles
+function myCreateElement(type, className, styles = {}) {
+    const element = document.createElement('div');
+    element.className = className;  
+    Object.assign(element.style, styles);
+    return element;
+}
+
+
+function showGameOver(won) {
+    gameState.gameRunning = false; // Stop the game loop
+    document.getElementById('game-over-title').textContent = won ? 'You Win!' : 'Game Over';
+    document.getElementById('final-score').textContent = `Final Score: ${gameState.score}`;
+    document.getElementById('game-over').style.display = 'block';
+}
+
+function clearLevel() {
+    //const gameArea = document.getElementById('game-area');
+    Object.values(gameObjects).flat().forEach(obj => {
+       if (obj.element && obj.element.parentNode) {
+            obj.element.remove(); // Remove element from DOM 
+       }    
+    })
+
+    // Reset gameObjects arrays
+    gameObjects = {
+        platforms: [], 
+        enemies: [],    
+        coins: [],    
+        surpriseBlocks: [],    
+        pipes: []    
+    }   
+} // END of clearLevel function
+
+
+// Input Handling - vid_time: 59:02 / 2:12:04
+
 
 
 // Start Game
