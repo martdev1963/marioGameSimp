@@ -9,6 +9,16 @@ body {
     height: 100vh;
 }
 
+
+/* MAB Media text */
+h4 {
+    margin-top: -20px;
+    margin-bottom: 2px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+
 .game-container {
     background: #fff;
     border-radius: 10px;
@@ -26,6 +36,7 @@ body {
 }
 
 #game-area {
+position: relative; /* the parent for all absolute children, as opposed to the webpage being their parent */
 width: 800px;
 height: 400px;
 background: linear-gradient(to bottom, #000, #5C94FC 80%, #228B22 80%, #228B22 100%);
@@ -82,7 +93,7 @@ overflow: hidden;
     height: 20px;
 }
 
-.enemy {
+.enemy.brown {
     background-image: url('https://i.imgur.com/KP03fR9.png');
     position: absolute;
     width: 20px;
