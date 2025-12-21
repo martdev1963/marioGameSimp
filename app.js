@@ -109,7 +109,7 @@ const levels = [
         enemies: [
             { x: 350, y: 344, type: 'purple' }, // green enemy
             { x: 650, y: 344, type: 'purple' },  // green enemy
-            { x: 570, y: 264, type: 'purple' }  // green enemy 
+            { x: 570, y: 264, type: 'spider' }  // spider enemy
         ], // Array to hold enemy objects
         coins: [
             { x: 160, y: 260}, // coin
