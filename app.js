@@ -2,6 +2,9 @@
 /**
  * -----------------------------------------------------------
  *                    GAME CONSTANTS
+ * The greatest common divisor (GCD) of all movement-related 
+ * constants is 0.5
+ * The greatest teacher, failure is. - Yoda
  * -----------------------------------------------------------
  */
 const GRAVITY = 0.5; // Acceleration due to gravity (m/s^2)
@@ -30,7 +33,7 @@ let gameState = {
 let player = {
     element: document.getElementById('mario'), // Player DOM element
     x: 50, // Player's x position
-    y: 300, // Player's y position
+    y: 340, // Player's y position
     width: 20, // Player's width
     height: 20, // Player's height
     velocityX: 0, // Player's horizontal velocity
@@ -83,12 +86,12 @@ const levels = [
             { x: 620, y: 260}, // coin
         ],
 
-        surpriseBlocks: [  // type can be 'coin' or 'mushroom' representing different surprise block types (via their class names)
+        surpriseBlocks: [  // type can be 'coin' or 'mushroom' or 'spiders', etc, representing different surprise block types (via their class names)
             { x: 350, y: 220, type: 'mushroom' }, // mushroom surprise block
         ],
 
         pipes: [  // type can be 'small' or 'large' representing different pipe types (via their class names)
-            { x: 750, y: 300} // pipe
+            { x: 750, y: 320} // pipe
         ]
 
     }, // END of level 1
@@ -123,7 +126,7 @@ const levels = [
             { x: 500, y: 220, type: 'coin' } // coin surprise block
         ], // Array to hold surprise block objects
         pipes: [
-            { x: 750, y: 300} // pipe
+            { x: 750, y: 320} // pipe
         ] // Array to hold pipe objects
 
     } // END of level 2        
@@ -141,16 +144,24 @@ const levels = [
 
 /**
  * -----------------------------------------------------------
- *                  INITIALIZE THE GAME         
+ *                  INITIALIZE THE GAME
+ *                        START         
  * -----------------------------------------------------------
  */
 
 function initGame() {
     loadLevel(gameState.level -1); // Load the first level which is at index 0
-    //gameLoop();
+    gameLoop();
 
     // Additional initialization code can go here
 }
+
+/**
+ * -----------------------------------------------------------
+ *                  INITIALIZE THE GAME
+ *                         END         
+ * -----------------------------------------------------------
+ */
 
 
 /**
@@ -176,7 +187,7 @@ function loadLevel(levelIndex) {
 
     // reset player object properties
     player.x = 50;
-    player.y = 300;
+    player.y = 340;
     player.velocityX = 0;
     player.velocityY = 0;
     player.big = false;
@@ -185,6 +196,13 @@ function loadLevel(levelIndex) {
 
     //function call below to update player position in DOM
     updateElementPosition(player.element, player.x, player.y) // this function updates the player's DOM element position based on player.x and player.y
+
+    /**
+ * -----------------------------------------------------------
+ *                  ARROW => FUNCTION DEFINITIONS
+ *                          START       
+ * -----------------------------------------------------------
+ */ 
 
     // create platforms
     level.platforms.forEach((platformData, index) => {
@@ -204,7 +222,104 @@ function loadLevel(levelIndex) {
             type: platformData.type,
             id: 'platform-' + index
         });
-    }); // END of forEach platform loop
+    }); // END of forEach function platform creation loop
+
+    // Similar creation loops for enemies, coins, surpriseBlocks, and pipes can be added here
+    // Create enemies
+    level.enemies.forEach((enemyData, index) => {
+        const enemy = myCreateElement('div', `enemy ${enemyData.type}`, {  
+            left: enemyData.x + 'px',       
+            top: enemyData.y + 'px' // vid_time: 1:03:32 / 2:12:04
+        });
+        gameArea.appendChild(enemy);
+        gameObjects.enemies.push({ // add enemy object to gameObjects.enemies array
+            element: enemy, 
+            x: enemyData.x,
+            y: enemyData.y,
+            width: 20, // assuming fixed width for enemies
+            height: 20, // assuming fixed height for enemies
+            direction: -1, // 1 for right, -1 for left
+            speed: ENEMY_SPEED,
+            id: 'enemy-' + index,
+            alive: true
+        });
+    }); // END of forEach function enemy creation loop
+
+    // Create coins
+    level.coins.forEach((coinData, index) => {
+        const coin = myCreateElement('div', 'coin', {   
+            left: coinData.x + 'px',       
+            top: coinData.y + 'px' 
+        });
+        gameArea.appendChild(coin);
+        gameObjects.coins.push({ // add coin object to gameObjects.coins array
+            element: coin, 
+            x: coinData.x,
+            y: coinData.y,
+            width: 20, // assuming fixed width for coins
+            height: 20, // assuming fixed height for coins            
+            collected: false,
+            id: 'coin-' + index  // vid_time: 1:07:02 / 2:12:04
+        });
+    }); // END of forEach function coin creation loop
+
+    // Create surprise blocks
+    level.surpriseBlocks.forEach((blockData, index) => {
+        const block = myCreateElement('div', `surprise-block ${blockData.type}`, {  
+            left: blockData.x + 'px',
+            top: blockData.y + 'px' 
+        });
+        gameArea.appendChild(block);
+        gameObjects.surpriseBlocks.push({ // add surprise block object to gameObjects.surpriseBlocks array
+            element: block, 
+            x: blockData.x,
+            y: blockData.y,
+            width: 20, // assuming fixed width for blocks
+            height: 20, // assuming fixed height for blocks
+            type: blockData.type,
+            hit: false,
+            id: 'surprise-block-' + index  // vid_time: 1:10:31 / 2:12:04
+        });
+    }
+    ); // END of forEach function surprise block creation loop
+
+    // Create pipes
+    level.pipes.forEach((pipeData, index) => {
+        const pipe = myCreateElement('div', 'pipe', {  
+            left: pipeData.x + 'px',    
+            top: pipeData.y + 'px' 
+        });
+
+        // pipe parts (associated object versions of the respective html elements)   
+        const pipeTopLeft = myCreateElement('div', 'pipe-top');
+        const pipeTopRight = myCreateElement('div', 'pipe-top-right');
+        const pipeBottomLeft = myCreateElement('div', 'pipe-bottom');
+        const pipeBottomRight = myCreateElement('div', 'pipe-bottom-right');
+        
+
+        // Append pipe parts to pipe element
+        // could do it this way too, as far as appending goes...
+        // pipe.append(pipeTopLeft, pipeTopRight, pipeBottomLeft, pipeBottomRight);
+        pipe.appendChild(pipeTopLeft);
+        pipe.appendChild(pipeTopRight);
+        pipe.appendChild(pipeBottomLeft);
+        pipe.appendChild(pipeBottomRight);  
+
+        gameArea.appendChild(pipe); 
+        gameObjects.pipes.push({ // add pipe object to gameObjects.pipes array
+            element: pipe, 
+            x: pipeData.x,
+            y: pipeData.y,  
+            width: 40, // assuming fixed width for pipes
+            height: 40, // assuming fixed height for pipes          
+            id: 'pipe-' + index  // vid_time: 1:12:30 / 2:12:04
+        });
+    }
+    ); // END of forEach function pipe creation loop vid_time: 1:14:30 / 2:12:04
+
+
+
+
 
 
 } // END of loadLevel function
@@ -252,8 +367,56 @@ function clearLevel() {
 } // END of clearLevel function
 
 
-// Input Handling - vid_time: 59:02 / 2:12:04
 
+/**
+ * -----------------------------------------------------------
+ *                  Event Listeners
+ *                       START         
+ * -----------------------------------------------------------
+ */
+
+// Input Handling - vid_time: 59:02 / 2:12:04
+document.addEventListener('keydown', (e) => {       
+    gameState.keys[e.code] = true; // Set the key as pressed
+
+    if (e.code === 'Space' && player.grounded) {
+        player.velocityY = JUMP_FORCE; // Apply jump force
+        player.grounded = false; // Player is now in the air
+    }
+});
+
+document.addEventListener('keyup', (e) => {       
+    gameState.keys[e.code] = false; // Set the key as released
+});
+
+
+/**
+ * -----------------------------------------------------------
+ *                  Event Listeners
+ *                        END         
+ * -----------------------------------------------------------
+ */
+
+
+// Game Loop
+function gameLoop() {
+    if (!gameState.gameRunning) return; // Exit if the game is not running  
+
+    update(); // Update game state
+    requestAnimationFrame(gameLoop); // Request the next frame
+}
+
+
+
+// update function to update game state (game logic)  vid_time: 1:16:36 / 2:12:04
+function update() {
+    // Update player position based on velocity
+    player.x += player.velocityX;
+    player.y += player.velocityY;
+    // Apply gravity
+    player.velocityY += GRAVITY;
+
+}
 
 
 // Start Game
