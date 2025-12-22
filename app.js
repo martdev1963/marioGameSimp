@@ -406,17 +406,65 @@ function gameLoop() {
     requestAnimationFrame(gameLoop); // Request the next frame
 }
 
-
-
 // update function to update game state (game logic)  vid_time: 1:16:36 / 2:12:04
 function update() {
+    //console.log('Game updating...');
+    //console.log(`Player position: (${player.x}, ${player.y})`);
+    //console.log(`Player velocity: (${player.velocityX}, ${player.velocityY})`);
+    console.log(gameState.keys);
+    // handles left and right movement
+    if (gameState.keys['ArrowLeft'] || gameState.keys['KeyA']) {
+        player.velocityX = -MOVE_SPEED; // Move left
+    } else if (gameState.keys['ArrowRight'] || gameState.keys['KeyD']) {    
+        player.velocityX = MOVE_SPEED; // Move right
+    } else {
+        player.velocityX *= 0.8; // No horizontal movement...apply friction
+    }   
+
+    // handle jumping
+    if (gameState.keys['Space'] && player.grounded) {
+        player.velocityY = JUMP_FORCE; // Apply jump force
+        player.grounded = false; // Player is now in the air
+    }
+
+    // apply gravity and update position
+    if (!player.grounded) {
+        player.velocityY += GRAVITY; // Apply gravity
+    }
+
     // Update player position based on velocity
     player.x += player.velocityX;
     player.y += player.velocityY;
-    // Apply gravity
-    player.velocityY += GRAVITY;
+
+
+    // platform collision detection
+    player.grounded = false; // Assume player is in the air...reset grounded status
+    for (let platform of gameObjects.platforms) {
+        if (checkCollision(player, platform)) {
+            if (player.velocityY > 0) { // Falling down
+                // Simple collision response: place player on top of platform
+                player.y = platform.y - player.height; // Align player on top of platform
+                player.velocityY = 0;
+                player.grounded = true;
+            }    
+        }
+    }    
+
+    updateElementPosition(player.element, player.x, player.y); // Update player position in DOM
+    // vid_time: 1:27:47 / 2:12:04
 
 }
+
+
+function checkCollision(rect1, rect2) {
+    return (
+        rect1.x < rect2.x + rect2.width &&  
+        rect1.x + rect1.width > rect2.x &&  
+        rect1.y < rect2.y + rect2.height &&  
+        rect1.y + rect1.height > rect2.y    
+    );
+}
+
 
 
 // Start Game
