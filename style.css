@@ -95,48 +95,90 @@ overflow: hidden;
 
 .enemy.brown {
     background-image: url('https://i.imgur.com/KP03fR9.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
     position: absolute;
     width: 20px;
     height: 20px;
+    text-indent: -9999px;
+    overflow: hidden;
+    font-size: 0;
+    line-height: 0;
 }
 
 .enemy.spider {
     background-image: url('/img/pics/Spider_1.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
     position: absolute;
     width: 20px;
     height: 20px;
+    text-indent: -9999px;
+    overflow: hidden;
+    font-size: 0;
+    line-height: 0;
 }
 
 
 .enemy.purple {
     background-image: url('https://i.imgur.com/SvV4ueD.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
     position: absolute;
     width: 20px;
     height: 20px;
+    text-indent: -9999px;
+    overflow: hidden;
+    font-size: 0;
+    line-height: 0;
 }
     
 
 .coin {
     background-image: url('https://i.imgur.com/wbKxhcd.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     position: absolute;
     width: 20px;
     height: 20px;
     animation: coinSpin 1s infinite linear;
+    text-indent: -9999px;
+    overflow: hidden;
+    font-size: 0;
+    line-height: 0;
 }    
 
 .surprise-block {
     background-image: url('https://i.imgur.com/gesQ1KP.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     position: absolute;
     width: 20px;
     height: 20px;
+    text-indent: -9999px;
+    overflow: hidden;
+    font-size: 0;
+    line-height: 0;
 }    
 
 
 .surprise-block.hit {
     background-image: url('https://i.imgur.com/bdrLpi6.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     position: absolute;
     width: 20px;
     height: 20px;
+    text-indent: -9999px;
+    overflow: hidden;
+    font-size: 0;
+    line-height: 0;
 } 
 
 
