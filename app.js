@@ -76,12 +76,12 @@ const levels = [
             { x: 600, y: 280, width: 80, height: 20, type: 'floating' }, // Ground platform
         ],
         enemies: [  // type can be 'goomba' or 'turtle' representing different enemy types (via their class names)
-            { x: 250, y: 344, type: 'brown' }, // brown enemy
-            { x: 550, y: 344, type: 'brown' }, // brown enemy    
+            { x: 250, y: 314, type: 'brown' }, // brown enemy (y: 360 - 50 = 314 to sit on platform)
+            { x: 550, y: 314, type: 'brown' }, // brown enemy (y: 360 - 50 = 314 to sit on platform)    
         ],
 
         coins: [  // type can be 'gold' or 'silver' representing different coin types (via their class names)
-            { x: 220, y: 260}, // coin
+            { x: 220, y: 260}, // coin 
             { x: 320, y: 220}, // coin
             { x: 620, y: 260}, // coin
         ],
@@ -110,9 +110,9 @@ const levels = [
                    { x: 550, y: 280, width: 200, height: 40, type: 'blue' } // Ground platform
         ],
         enemies: [
-            { x: 350, y: 344, type: 'purple' }, // green enemy
-            { x: 650, y: 344, type: 'purple' },  // green enemy
-            { x: 570, y: 264, type: 'spider' }  // spider enemy
+            { x: 350, y: 310, type: 'purple' }, // purple enemy (y: 360 - 50 = 310 to sit on platform)
+            { x: 650, y: 310, type: 'purple' },  // purple enemy (y: 360 - 50 = 310 to sit on platform)
+            { x: 570, y: 230, type: 'spider' }  // spider enemy (y: 280 - 50 = 230 to sit on platform)
         ], // Array to hold enemy objects
         coins: [
             { x: 160, y: 260}, // coin
@@ -237,8 +237,8 @@ function loadLevel(levelIndex) {
             element: enemy, 
             x: enemyData.x,
             y: enemyData.y,
-            width: 20, // assuming fixed width for enemies
-            height: 20, // assuming fixed height for enemies
+            width: 50, // assuming fixed width for enemies
+            height: 50, // assuming fixed height for enemies
             direction: -1, // 1 for right, -1 for left
             speed: ENEMY_SPEED,
             id: 'enemy-' + index,
@@ -439,6 +439,23 @@ function update() {
     player.x += player.velocityX;
     player.y += player.velocityY;
 
+    // Boundary checking - keep player within game area
+    const GAME_AREA_WIDTH = 800; // Game area width from CSS
+    const GAME_AREA_HEIGHT = 400; // Game area height from CSS
+    
+    // Constrain player X position (left and right boundaries)
+    if (player.x < 0) {
+        player.x = 0; // Prevent going off left edge
+    } else if (player.x + player.width > GAME_AREA_WIDTH) {
+        player.x = GAME_AREA_WIDTH - player.width; // Prevent going off right edge
+    }
+    
+    // Constrain player Y position (top and bottom boundaries)
+    if (player.y < 0) {
+        player.y = 0; // Prevent going above top edge
+    } else if (player.y + player.height > GAME_AREA_HEIGHT) {
+        player.y = GAME_AREA_HEIGHT - player.height; // Prevent going below bottom edge
+    }
 
     // Simple collision response: place player on top of platform
     player.grounded = false; // Assume player is in the air...reset grounded status
@@ -471,20 +488,9 @@ function update() {
         if (!enemy.alive) continue; // Skip dead enemies
         
         enemy.x += enemy.speed * enemy.direction; // Move enemy
-        let onPlatform = false;
-        // Reverse enemy direction upon hitting platform edges  
-        for (let platform of gameObjects.platforms) {
-            if (enemy.x + enemy.width > platform.x && 
-                enemy.x < platform.x + platform.width && 
-                enemy.y + enemy.height >= platform.y - 5 && 
-                enemy.y + enemy.height <= platform.y + 5
-            ) {
-                onPlatform = true;
-                break;
-            } // vid_time: 1:33:52 / 2:12:04
-        }   
-
-        if (!onPlatform || enemy.x <= 0 || enemy.x + enemy.width >= 800)  { // Assuming game area width is 800px
+        
+        // Reverse direction if at screen boundaries
+        if (enemy.x <= 0 || enemy.x + enemy.width >= 800) {
             enemy.direction *= -1; // Reverse direction
         }
         
