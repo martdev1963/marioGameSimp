@@ -231,6 +231,7 @@ function loadLevel(levelIndex) {
             left: enemyData.x + 'px',       
             top: enemyData.y + 'px' // vid_time: 1:03:32 / 2:12:04
         });
+        enemy.textContent = '';
         gameArea.appendChild(enemy);
         gameObjects.enemies.push({ // add enemy object to gameObjects.enemies array
             element: enemy, 
@@ -251,6 +252,7 @@ function loadLevel(levelIndex) {
             left: coinData.x + 'px',       
             top: coinData.y + 'px' 
         });
+        coin.textContent = '';
         gameArea.appendChild(coin);
         gameObjects.coins.push({ // add coin object to gameObjects.coins array
             element: coin, 
@@ -269,6 +271,7 @@ function loadLevel(levelIndex) {
             left: blockData.x + 'px',
             top: blockData.y + 'px' 
         });
+        block.textContent = '';
         gameArea.appendChild(block);
         gameObjects.surpriseBlocks.push({ // add surprise block object to gameObjects.surpriseBlocks array
             element: block, 
@@ -334,7 +337,7 @@ function updateElementPosition(element, x, y) {
 
 // Function to create a DOM element with specified tag, class, and styles
 function myCreateElement(type, className, styles = {}) {
-    const element = document.createElement('div');
+    const element = document.createElement(type);
     element.className = className;  
     Object.assign(element.style, styles);
     return element;
@@ -437,12 +440,12 @@ function update() {
     player.y += player.velocityY;
 
 
-    // platform collision detection
+    // Simple collision response: place player on top of platform
     player.grounded = false; // Assume player is in the air...reset grounded status
     for (let platform of gameObjects.platforms) {
         if (checkCollision(player, platform)) {
             if (player.velocityY > 0) { // Falling down
-                // Simple collision response: place player on top of platform
+               
                 player.y = platform.y - player.height; // Align player on top of platform
                 player.velocityY = 0;
                 player.grounded = true;
@@ -450,11 +453,52 @@ function update() {
         }
     }    
 
-    updateElementPosition(player.element, player.x, player.y); // Update player position in DOM
-    // vid_time: 1:27:47 / 2:12:04
+    // PIPE collision detection
+    for (let pipe of gameObjects.pipes) {
+        if (checkCollision(player, pipe)) { 
+            // Simple collision response: place player on top of pipe
+            if (player.velocityY > 0) { // Falling down
+                player.y = pipe.y - player.height; // Align player on top of pipe
+                player.velocityY = 0;
+                player.grounded = true;
+            }
+        }
+    } 
+
+
+    // ENEMY collision detection
+    for (let enemy of gameObjects.enemies) {
+        if (!enemy.alive) continue; // Skip dead enemies
+        
+        enemy.x += enemy.speed * enemy.direction; // Move enemy
+        let onPlatform = false;
+        // Reverse enemy direction upon hitting platform edges  
+        for (let platform of gameObjects.platforms) {
+            if (enemy.x + enemy.width > platform.x && 
+                enemy.x < platform.x + platform.width && 
+                enemy.y + enemy.height >= platform.y - 5 && 
+                enemy.y + enemy.height <= platform.y + 5
+            ) {
+                onPlatform = true;
+                break;
+            } // vid_time: 1:33:52 / 2:12:04
+        }   
+
+        if (!onPlatform || enemy.x <= 0 || enemy.x + enemy.width >= 800)  { // Assuming game area width is 800px
+            enemy.direction *= -1; // Reverse direction
+        }
+        
+        updateElementPosition(enemy.element, enemy.x, enemy.y); // Update enemy position in DOM
+
+    }
+
+    // Update player DOM element position
+    updateElementPosition(player.element, player.x, player.y);
+
+
+
 
 }
-
 
 function checkCollision(rect1, rect2) {
     return (
