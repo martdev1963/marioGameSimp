@@ -53,7 +53,7 @@ overflow: hidden;
     height: 20px;
     background-size: cover;
     background-repeat: no-repeat;
-    background-image: url('https://i.imgur.com/Wb1qfhK.png');
+    background-image: url('https://i.imgur.com/Wb1qfhK.png'); /**the bug was bad syntax on loc:56..."background: url()" */
     z-index: 100;
 }   
 
