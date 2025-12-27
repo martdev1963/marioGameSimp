@@ -391,9 +391,12 @@ function clearLevel() {
 document.addEventListener('keydown', (e) => {       
     gameState.keys[e.code] = true; // Set the key as pressed
 
-    if (e.code === 'Space' && player.grounded) {
-        player.velocityY = JUMP_FORCE; // Apply jump force
-        player.grounded = false; // Player is now in the air
+    if (e.code === 'Space') {
+        e.preventDefault(); // Prevent default space key behavior (page scrolling)
+        if (player.grounded) {
+            player.velocityY = JUMP_FORCE; // Apply jump force
+            player.grounded = false; // Player is now in the air
+        }
     }
 });
 
