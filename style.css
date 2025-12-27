@@ -51,16 +51,18 @@ overflow: hidden;
     position: absolute;
     width: 20px;
     height: 20px;
-    background: url('https://i.imgur.com/Wb1qfhK.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-image: url('https://i.imgur.com/Wb1qfhK.png');
     z-index: 100;
 }   
 
 /* -START- these objects will be dynamically instantiated into the html via js */
 /* this id will be dynamically added with js into the html - # of mario and class name of big */
 #mario.big {
-    width: 40px;
-    height: 40px;
-    background: url('https://i.imgur.com/Wb1qfhK.png');
+    width: 30px;
+    height: 30px;
+    background-image: url('https://i.imgur.com/Wb1qfhK.png');
 }
 
 

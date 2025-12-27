@@ -334,6 +334,15 @@ function updateElementPosition(element, x, y) {
     element.style.top = y + 'px';
 }
 
+// Function to update the score display in the UI
+// This function syncs the gameState.score with the HTML element that displays the score
+function updateScoreDisplay() {
+    const scoreElement = document.getElementById('score');
+    if (scoreElement) {
+        scoreElement.textContent = gameState.score; // Update the displayed score to match gameState.score
+    }
+}
+
 
 // Function to create a DOM element with specified tag, class, and styles
 function myCreateElement(type, className, styles = {}) {
@@ -415,6 +424,19 @@ function update() {
     //console.log(`Player position: (${player.x}, ${player.y})`);
     //console.log(`Player velocity: (${player.velocityX}, ${player.velocityY})`);
     console.log(gameState.keys);
+    
+    // Handle big timer countdown - decrement timer each frame and return to normal size when timer reaches 0
+    if (player.bigTimer > 0) {
+        player.bigTimer--; // Decrement timer by 1 each frame (at 60 FPS, 600 frames = 10 seconds)
+        if (player.bigTimer <= 0) {
+            // Timer expired - return player to normal size
+            player.big = false;
+            player.bigTimer = 0;
+            player.element.classList.remove('big'); // Remove big class to return to normal size
+            player.width = 20; // Return to normal width
+            player.height = 20; // Return to normal height
+        }
+    }
     // handles left and right movement
     if (gameState.keys['ArrowLeft'] || gameState.keys['KeyA']) {
         player.velocityX = -MOVE_SPEED; // Move left
@@ -483,7 +505,7 @@ function update() {
     } 
 
 
-    // ENEMY collision detection
+    // ENEMY collision detection and movement so they stay within screen bounds
     for (let enemy of gameObjects.enemies) {
         if (!enemy.alive) continue; // Skip dead enemies
         
@@ -496,15 +518,77 @@ function update() {
         
         updateElementPosition(enemy.element, enemy.x, enemy.y); // Update enemy position in DOM
 
-    }
+        // Check player-enemy collision
+        if (checkCollision(player, enemy)) {
+            if (player.velocityY > 0 && player.y < enemy.y) { // Player is falling onto enemy
+                // jump on enemy to defeat it
+                enemy.alive = false;
+                enemy.element.remove(); // Remove enemy from DOM
+                player.velocityY = JUMP_FORCE * 0.7; // Bounce up after defeating enemy (JUMP_FORCE will slower bounce)
+                gameState.score += 100; // Increase score for defeating (jumping on) enemy
+            updateScoreDisplay(); // Update the score display in the UI to reflect the new score
+            } else {  
+                // Player hit by enemy - lose a life
+                if (player.big) {
+                    // Shrink player if big
+                    player.big = false;
+                    player.bigTimer = 0;
+                    player.element.classList.remove('big'); // Reset player class to small
+                    player.width = 20;
+                    player.height = 20;
+                    continue; // Skip life loss
+                } else {
+                    // Lose a life 
+                    //loseLife(); // Implement loseLife function to handle life loss   vid_time: 1:37:00 / 2:12:04
+                }    
+            }
+        } // END of player-enemy collision check
+    } // END of enemy loop - closes the for (let enemy of gameObjects.enemies) loop
 
-    // Update player DOM element position
+    // coin collection detection
+    for (let coin of gameObjects.coins) {
+        if (!coin.collected && checkCollision(player, coin)) {
+            coin.collected = true;
+            coin.element.remove(); // Remove coin from DOM
+            gameState.score += 50; // Increase score for collecting coin
+            updateScoreDisplay(); // Update the score display in the UI to reflect the new score
+        }
+    } // END of coin collection loop - closes the for (let coin of gameObjects.coins) loop
+
+    // surprise block interaction vid_time: 1:39:42 / 2:12:04
+    for (let block of gameObjects.surpriseBlocks) {
+        // Only trigger if block hasn't been hit, player is moving upward (hitting from below), and player is below the block
+        if (!block.hit && player.velocityY < 0 && player.y + player.height > block.y + block.height && checkCollision(player, block)) {
+            block.hit = true; // Mark block as hit immediately to prevent multiple triggers in the same collision
+            block.element.classList.add('hit'); // Change block pic to hit state pic...
+            
+            // Spawn item based on block type
+            if (block.type === 'mushroom') {
+                // Only apply big state if player is not already big (prevents multiple applications)
+                if (!player.big) {
+                    player.big = true;
+                    player.bigTimer = 600; // Set big timer (600 frames at 60 FPS = 10 seconds)
+                    player.element.classList.add('big'); // Change player class to big
+                    player.width = 40;  // Update player width for big state (matches CSS #mario.big width)
+                    player.height = 40; // Update player height for big state (matches CSS #mario.big height)
+                }
+                gameState.score += 150; // Increase score for getting mushroom
+                updateScoreDisplay(); // Update the score display in the UI to reflect the new score
+                // Spawn mushroom above the block
+            } else if (block.type === 'coin') {
+                gameState.score += 50; // Increase score for getting coin from block
+                updateScoreDisplay(); // Update the score display in the UI to reflect the new score
+                // Spawn coin above the block
+            } // END of block type check
+        } // END of surprise block collision check
+    } // END of surprise block loop - closes the for (let block of gameObjects.surpriseBlocks) loop
+
+    // Update player DOM element position - THIS MUST BE INSIDE THE update() FUNCTION
+    // This line was previously outside the function, causing Mario's position to never update in the DOM
     updateElementPosition(player.element, player.x, player.y);
 
+} // END of update function - properly closes the update() function
 
-
-
-}
 
 function checkCollision(rect1, rect2) {
     return (
