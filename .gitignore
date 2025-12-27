@@ -1,0 +1,31 @@
+# Assets directory
+img/
+
+# macOS files
+.DS_Store
+__MACOSX/
+._*
+
+# Image files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.webp
+*.ico
+*.bmp
+
+# Font files
+*.ttf
+*.otf
+*.woff
+*.woff2
+*.eot
+
+# Other common files to ignore
+*.log
+node_modules/
+.env
+.env.local
+
