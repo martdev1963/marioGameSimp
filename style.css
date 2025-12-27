@@ -60,8 +60,8 @@ overflow: hidden;
 /* -START- these objects will be dynamically instantiated into the html via js */
 /* this id will be dynamically added with js into the html - # of mario and class name of big */
 #mario.big {
-    width: 30px;
-    height: 30px;
+    width: 35px;
+    height: 35px;
     background-image: url('https://i.imgur.com/Wb1qfhK.png');
 }
 

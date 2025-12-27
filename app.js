@@ -569,8 +569,9 @@ function update() {
                     player.big = true;
                     player.bigTimer = 600; // Set big timer (600 frames at 60 FPS = 10 seconds)
                     player.element.classList.add('big'); // Change player class to big
-                    player.width = 40;  // Update player width for big state (matches CSS #mario.big width)
-                    player.height = 40; // Update player height for big state (matches CSS #mario.big height)
+                    /*Test this to see if it affects mario's size as opposed to the css code doing it when mario.big class is applied in loc:571 above...*/
+                    player.width = 35;  // Update player width for big state (matches CSS #mario.big width)
+                    player.height = 35; // Update player height for big state (matches CSS #mario.big height)
                 }
                 gameState.score += 150; // Increase score for getting mushroom
                 updateScoreDisplay(); // Update the score display in the UI to reflect the new score
