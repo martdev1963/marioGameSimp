@@ -52,8 +52,8 @@ overflow: hidden;
     width: 20px;
     height: 20px;
     background-size: cover;
-    background-repeat: no-repeat;
-    background-image: url('https://i.imgur.com/Wb1qfhK.png'); /**the bug was bad syntax on loc:56..."background: url()" */
+    background-repeat: no-repeat; /* to prevent image tiling which caused mario's quadrupling */
+    background-image: url('https://i.imgur.com/Wb1qfhK.png'); /* the bug was bad syntax on loc:56..."background: url()", instead of background-image: url() */
     z-index: 100;
 }   
 
@@ -69,30 +69,30 @@ overflow: hidden;
 .platform {
     background-image: url('https://i.imgur.com/M6rwarW.png');
     position: absolute;
-    width: 20px;
-    height: 20px;
+    background-size: 20px 20px;
+    background-repeat: repeat;
 }
 
 
 .platform.ground {
     background-image: url('https://i.imgur.com/pogC9x5.png');
     position: absolute;
-    width: 20px;
-    height: 20px;
+    background-size: 20px 20px;
+    background-repeat: repeat;
 }
 
 .platform.floating {
     background-image: url('https://i.imgur.com/pogC9x5.png');
     position: absolute;
-    width: 20px;
-    height: 20px;
+    background-size: 20px 20px;
+    background-repeat: repeat;
 }
 
 .platform.blue {
     background-image: url('https://i.imgur.com/fVscIbn.png');
     position: absolute;
-    width: 20px;
-    height: 20px;
+    background-size: 20px 20px;
+    background-repeat: repeat;
 }
 
 .enemy.brown {
@@ -190,6 +190,8 @@ overflow: hidden;
     position: absolute;
     top: 0;
     left: 0;
+    background-size: cover;
+    background-repeat: no-repeat;
     width: 20px;
     height: 20px;
     background-image: url('https://i.imgur.com/ReTPiWY.png');
@@ -199,6 +201,8 @@ overflow: hidden;
     position: absolute;
     top: 320;
     right: 0;
+    background-size: cover;
+    background-repeat: no-repeat;
     width: 20px;
     height: 20px;
     background-image: url('https://i.imgur.com/hj2GK4n.png'); /* vid_time: 1:14:47 / 2:12:04 */
@@ -209,6 +213,8 @@ overflow: hidden;
     position: absolute;
     bottom: 0;
     left: 0;
+    background-size: cover;
+    background-repeat: no-repeat;
     width: 20px;
     height: 20px;
     background-image: url('https://i.imgur.com/c1cYSbt.png');

@@ -87,7 +87,7 @@ const levels = [
         ],
 
         surpriseBlocks: [  // type can be 'coin' or 'mushroom' or 'spiders', etc, representing different surprise block types (via their class names)
-            { x: 350, y: 220, type: 'mushroom' }, // mushroom surprise block
+            { x: 320, y: 120, type: 'mushroom' }, // mushroom surprise block
         ],
 
         pipes: [  // type can be 'small' or 'large' representing different pipe types (via their class names)
@@ -105,21 +105,21 @@ const levels = [
               { x: 600, y: 360, width: 200, height: 40, type: 'blue' }, // Ground platform
                { x: 150, y: 300, width: 200, height: 40, type: 'blue' }, // Ground platform
                 { x: 250, y: 280, width: 200, height: 40, type: 'blue' }, // Ground platform
-                 { x: 350, y: 260, width: 200, height: 40, type: 'blue' }, // Ground platform
+                 { x: 350, y: 80, width: 200, height: 40, type: 'blue' }, // Ground platform
                   { x: 450, y: 240, width: 200, height: 40, type: 'blue' }, // Ground platform
-                   { x: 550, y: 280, width: 200, height: 40, type: 'blue' } // Ground platform
+                   { x: 550, y: 100, width: 200, height: 40, type: 'blue' } // Ground platform
         ],
         enemies: [
             { x: 350, y: 310, type: 'purple' }, // purple enemy (y: 360 - 50 = 310 to sit on platform)
-            { x: 650, y: 310, type: 'purple' },  // purple enemy (y: 360 - 50 = 310 to sit on platform)
+            { x: 650, y: 210, type: 'purple' },  // purple enemy (y: 360 - 50 = 310 to sit on platform)
             { x: 570, y: 230, type: 'spider' }  // spider enemy (y: 280 - 50 = 230 to sit on platform)
         ], // Array to hold enemy objects
         coins: [
             { x: 160, y: 260}, // coin
-            { x: 160, y: 260}, // coin
-            { x: 160, y: 260}, // coin
-            { x: 160, y: 260}, // coin
-            { x: 160, y: 260}, // coin
+            { x: 560, y: 70}, // coin
+            { x: 460, y: 160}, // coin
+            { x: 660, y: 260}, // coin
+            { x: 860, y: 260}, // coin
         ], // Array to hold coin objects
         surpriseBlocks: [
             { x: 200, y: 260, type: 'mushroom' }, // mushroom surprise block
@@ -171,6 +171,13 @@ function initGame() {
  * ---------------------------------------------------------------------------------------------------------------------------
  */
 
+/**
+ * -----------------------------------------------------------
+ *                  loadLevel() FUNCTION
+ *                         START       
+ * -----------------------------------------------------------
+ */
+
 function loadLevel(levelIndex) {
     if (levelIndex >= levels.length) {
 
@@ -199,7 +206,8 @@ function loadLevel(levelIndex) {
 
     /**
  * -----------------------------------------------------------
- *                  ARROW => FUNCTION DEFINITIONS
+ *               ARROW => FUNCTION DEFINITIONS
+ *                inside loadLevel() FUNCTION
  *                          START       
  * -----------------------------------------------------------
  */ 
@@ -321,14 +329,17 @@ function loadLevel(levelIndex) {
     ); // END of forEach function pipe creation loop vid_time: 1:14:30 / 2:12:04
 
 
-
-
-
-
 } // END of loadLevel function
-
+/**
+ * -----------------------------------------------------------
+ *                  loadLevel() FUNCTION
+ *                           END       
+ * -----------------------------------------------------------
+ */
 
 // Function to update the position of a DOM element based on x and y coordinates
+// This function sets the left and top CSS properties of the element
+// its completely generic and can be used for any element, not just the player (transparent function)
 function updateElementPosition(element, x, y) {
     element.style.left = x + 'px';
     element.style.top = y + 'px';
@@ -398,6 +409,10 @@ document.addEventListener('keydown', (e) => {
             player.grounded = false; // Player is now in the air
         }
     }
+
+    if (e.code === 'ArrowDown') {
+        e.preventDefault(); // Prevent default arrow down key behavior (page scrolling)
+    }
 });
 
 document.addEventListener('keyup', (e) => {       
@@ -465,8 +480,8 @@ function update() {
     player.y += player.velocityY;
 
     // Boundary checking - keep player within game area
-    const GAME_AREA_WIDTH = 800; // Game area width from CSS
-    const GAME_AREA_HEIGHT = 400; // Game area height from CSS
+    const GAME_AREA_WIDTH = 800; // Game area width from CSS - x axis
+    const GAME_AREA_HEIGHT = 400; // Game area height from CSS - y axis
     
     // Constrain player X position (left and right boundaries)
     if (player.x < 0) {
@@ -572,7 +587,7 @@ function update() {
                     player.big = true;
                     player.bigTimer = 600; // Set big timer (600 frames at 60 FPS = 10 seconds)
                     player.element.classList.add('big'); // Change player class to big
-                    /*Test this to see if it affects mario's size as opposed to the css code doing it when mario.big class is applied in loc:571 above...*/
+                    /* Test this to see if it affects mario's size as opposed to the css code doing it when mario.big class is applied in loc:585 above...it doesn't */
                     player.width = 35;  // Update player width for big state (matches CSS #mario.big width)
                     player.height = 35; // Update player height for big state (matches CSS #mario.big height)
                 }
@@ -587,9 +602,44 @@ function update() {
         } // END of surprise block collision check
     } // END of surprise block loop - closes the for (let block of gameObjects.surpriseBlocks) loop
 
+    // Pipe interaction - vid_time: 1:43:45 / 2:12:04
+    for (let pipe of gameObjects.pipes) {
+        if (player.grounded && 
+            player.x + player.width > pipe.x 
+            && player.x < pipe.x + pipe.width &&
+            // Math.abs() gets the absolute value of the difference to allow for slight position variations 
+            Math.abs((player.y + player.height) - pipe.y) < 5 && gameState.keys['ArrowDown']) { // 5 pixel tolerance of mario feet and pipe top
+            // Player is on top of pipe and pressing down key - go to next level    
+            nextLevel(); // Implement nextLevel function to load the next leve) // vid_time: 1:45:41 / 2:12:04
+        }
+
+        if (checkCollision(player, pipe)) {
+            if (player.velocityY > 0) { // Falling down
+                player.y = pipe.y - player.height; // Align player on top of pipe
+                player.velocityY = 0;
+                player.grounded = true;
+            }
+        }
+    } // END of pipe interaction loop - closes the for (let pipe of gameObjects.pipes) loop
+
+
+    // Falling below the game area - lose a life
+    // Fall death
+    if (player.y > GAME_AREA_HEIGHT) {
+        loseLife(); // Implement loseLife function to handle life loss vid_time: 1:46:56 / 2:12:04
+    }
+
     // Update player DOM element position - THIS MUST BE INSIDE THE update() FUNCTION
     // This line was previously outside the function, causing Mario's position to never update in the DOM
     updateElementPosition(player.element, player.x, player.y);
+
+    //document.getElementById('debug-info').textContent = `Player Pos: (${Math.round(player.x)}, ${Math.round(player.y)}) 
+    // Vel: (${player.velocityX.toFixed(2)}, ${player.velocityY.toFixed(2)}) 
+    // Grounded: ${player.grounded} Big: ${player.big} BigTimer: ${player.bigTimer}
+    // `;
+    document.getElementById('score').textContent = gameState.score; // Update score display in element with id 'score'
+    document.getElementById('level').textContent = gameState.level; // Update level display in element with id 'level'
+    document.getElementById('lives').textContent = gameState.lives; // Update lives display in element with id 'lives'
 
 } // END of update function - properly closes the update() function
 
@@ -604,6 +654,65 @@ function checkCollision(rect1, rect2) {
 }
 
 
+// NEXT FUNCTION TO WRITE
+//spawn item  on surpriseBlock vid_time: 1:58:12 / 2:12:04
+function spawnItemOnBox(type, x, y) {
+    const gameArea = document.getElementById('game-area');
+}
+
+
+// function to handle losing a life vid_time: 1:48:24 / 2:12:04
+function loseLife() {
+    gameState.lives--;  
+    if (gameState.lives <= 0) {
+        showGameOver(false); // Game over
+    } else {
+        // Reset player position and state
+        player.x = 50;
+        player.y = 340;
+        player.velocityX = 0;
+        player.velocityY = 0;
+        player.big = false;
+        player.bigTimer = 0;
+        player.element.classList.remove('big'); // reset player class
+        player.width = 20; // reset player width
+        player.height = 20; // reset player height
+        updateElementPosition(player.element, player.x, player.y); // Update player position in DOM
+    }
+} // END of loseLife function
+
+function nextLevel() {
+    gameState.level++;
+    if (gameState.level > levels.length) {
+        showGameOver(true); // Player has completed all levels    
+    } else {
+        loadLevel(gameState.level - 1); // Load the next level
+    }
+} // END of nextLevel function vid_time: 1:50:32 / 2:12:04 
+
+
+function restartGame() {
+    // Reset game state
+    gameState.score = 0;
+    gameState.level = 1;
+    gameState.lives = 3;
+    gameState.gameRunning = true;   
+    gameState.keys = {};
+    player.big = false;
+    player.bigTimer = 0;
+    player.element.classList.remove('big'); // reset player class
+    player.width = 20; // reset player width
+    player.height = 20; // reset player height
+    // Hide game over screen
+    document.getElementById('game-over').style.display = 'none';
+
+    // start the game again
+    initGame();
+} // END of restartGame function vid_time: 1:52:15 / 2:12:04
+
+
+const restartButton = document.getElementById('restart-button')
+restartButton.addEventListener('click', restartGame);
 
 // Start Game
 initGame();
