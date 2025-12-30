@@ -156,7 +156,15 @@ function initGame() {
     loadLevel(gameState.level -1); // Load the first level which is at index 0
     gameLoop();
 
-    // Additional initialization code can go here
+    // Start background music
+    const backgroundMusic = document.getElementById('background-music');
+    if (backgroundMusic) {
+        backgroundMusic.volume = 0.1; // Set volume to 10%
+        backgroundMusic.play().catch(error => {
+            // Handle autoplay restrictions - music will start on user interaction
+            console.log('Background music will start on user interaction:', error);
+        });
+    }
 }
 
 /**
@@ -368,12 +376,73 @@ function myCreateElement(type, className, styles = {}) {
     return element;
 }
 
+// Function to play collection sound effect
+function playCollectionSound() {
+    const collectionSound = document.getElementById('collection-sound');
+    if (collectionSound) {
+        collectionSound.volume = 0.1; // Set volume to 10%
+        collectionSound.currentTime = 0; // Reset to start of sound
+        collectionSound.play().catch(error => {
+            console.log('Could not play collection sound:', error);
+        });
+    }
+}
+
+
+// Function to pause all game sounds
+function pauseAllSounds() {
+    const backgroundMusic = document.getElementById('background-music');
+    if (backgroundMusic) {
+        backgroundMusic.pause();
+    }
+    const nextLevelSound = document.getElementById('next-level-sound');
+    if (nextLevelSound) {
+        nextLevelSound.pause();
+    }
+    const bounceSound = document.getElementById('bounce-sound');
+    if (bounceSound) {
+        bounceSound.pause();
+    }
+    const collectionSound = document.getElementById('collection-sound');
+    if (collectionSound) {
+        collectionSound.pause();
+    }
+    const enemyFartSound = document.getElementById('enemy-fart-sound');
+    if (enemyFartSound) {
+        enemyFartSound.pause();
+    }
+}
 
 function showGameOver(won) {
     gameState.gameRunning = false; // Stop the game loop
     document.getElementById('game-over-title').textContent = won ? 'You Win!' : 'Game Over';
     document.getElementById('final-score').textContent = `Final Score: ${gameState.score}`;
     document.getElementById('game-over').style.display = 'block';
+    
+    // Pause all other sounds
+    pauseAllSounds();
+    
+    if (won) {
+        // Play win sound
+        const winSound = document.getElementById('win-sound');
+        if (winSound) {
+            winSound.volume = 0.3; // Set volume to 30%
+            winSound.currentTime = 0; // Reset to start of sound
+            winSound.play().catch(error => {
+                console.log('Could not play win sound:', error);
+            });
+        }
+    } else {
+        // Play lose sound
+        const loseSound = document.getElementById('lose-sound');
+        if (loseSound) {
+            loseSound.volume = 0.3; // Set volume to 30%
+            loseSound.currentTime = 0; // Reset to start of sound
+            loseSound.play().catch(error => {
+                console.log('Could not play lose sound:', error);
+            });
+        }
+    }
 }
 
 function clearLevel() {
@@ -405,7 +474,16 @@ function clearLevel() {
  */
 
 // Input Handling - vid_time: 59:02 / 2:12:04
-document.addEventListener('keydown', (e) => {       
+document.addEventListener('keydown', (e) => {
+    // Start background music on first user interaction (handles autoplay restrictions)
+    const backgroundMusic = document.getElementById('background-music');
+    if (backgroundMusic && backgroundMusic.paused) {
+        backgroundMusic.volume = 0.1; // Set volume to 10%
+        backgroundMusic.play().catch(error => {
+            console.log('Could not start background music:', error);
+        });
+    }
+    
     gameState.keys[e.code] = true; // Set the key as pressed
 
     if (e.code === 'Space') {
@@ -413,6 +491,16 @@ document.addEventListener('keydown', (e) => {
         if (player.grounded) {
             player.velocityY = JUMP_FORCE; // Apply jump force
             player.grounded = false; // Player is now in the air
+            
+            // Play bounce sound effect
+            const bounceSound = document.getElementById('bounce-sound');
+            if (bounceSound) {
+                bounceSound.volume = 0.1; // Set volume to 10%
+                bounceSound.currentTime = 0; // Reset to start of sound
+                bounceSound.play().catch(error => {
+                    console.log('Could not play bounce sound:', error);
+                });
+            }
         }
     }
 
@@ -567,6 +655,16 @@ function update() {
                 // Player hit by enemy - lose a life
                 // Only take damage if player is not invincible
                 if (!player.invincible) {
+                    // Play enemy fart sound on horizontal collision
+                    const enemyFartSound = document.getElementById('enemy-fart-sound');
+                    if (enemyFartSound) {
+                        enemyFartSound.volume = 0.2; // Set volume to 20%
+                        enemyFartSound.currentTime = 0; // Reset to start of sound
+                        enemyFartSound.play().catch(error => {
+                            console.log('Could not play enemy fart sound:', error);
+                        });
+                    }
+                    
                     if (player.big) {
                         // Shrink player if big
                         player.big = false;
@@ -595,6 +693,7 @@ function update() {
             coin.element.remove(); // Remove coin from DOM
             gameState.score += 50; // Increase score for collecting coin
             updateScoreDisplay(); // Update the score display in the UI to reflect the new score
+            playCollectionSound(); // Play collection sound effect
         }
     } // END of coin collection loop - closes the for (let coin of gameObjects.coins) loop
 
@@ -606,6 +705,7 @@ function update() {
             gameState.lives++; // Gain a life when collecting mushroom
             gameState.score += 150; // Increase score for collecting mushroom
             updateScoreDisplay(); // Update the score display in the UI to reflect the new score
+            playCollectionSound(); // Play collection sound effect
             // Remove mushroom from gameObjects array
             const index = gameObjects.mushrooms.indexOf(mushroom);
             if (index > -1) {
@@ -792,6 +892,7 @@ function spawnItemOnBox(block, type) {
                 itemObject.element.remove(); // Remove coin from DOM
                 gameState.score += 50; // Increase score for collecting coin
                 updateScoreDisplay(); // Update the score display in the UI to reflect the new score
+                playCollectionSound(); // Play collection sound effect
                 // Remove coin from gameObjects array
                 const index = gameObjects.coins.indexOf(itemObject);
                 if (index > -1) {
@@ -862,6 +963,16 @@ function loseLife() {
 } // END of loseLife function
 
 function nextLevel() {
+    // Play next level sound effect
+    const nextLevelSound = document.getElementById('next-level-sound');
+    if (nextLevelSound) {
+        nextLevelSound.volume = 0.2; // Set volume to 20%
+        nextLevelSound.currentTime = 0; // Reset to start of sound
+        nextLevelSound.play().catch(error => {
+            console.log('Could not play next level sound:', error);
+        });
+    }
+    
     gameState.level++;
     if (gameState.level > levels.length) {
         showGameOver(true); // Player has completed all levels    
