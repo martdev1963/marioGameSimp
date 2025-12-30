@@ -16,6 +16,7 @@ __MACOSX/
 *.webp
 *.ico
 *.bmp
+*.zip
 
 # Font files
 *.ttf
