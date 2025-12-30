@@ -40,7 +40,9 @@ let player = {
     velocityY: 0, // Player's vertical velocity
     grounded: false, // Is the player on the ground?
     big: false, // Is the player in "big" state?
-    bigTimer: 0 // Timer for "big" state duration   
+    bigTimer: 0, // Timer for "big" state duration
+    invincible: false, // Is the player invincible (after taking damage)?
+    invincibleTimer: 0 // Timer for invincibility duration
 }
 
 /**
@@ -54,7 +56,8 @@ let gameObjects = {
     enemies: [], // Array to hold enemy objects
     coins: [], // Array to hold coin objects
     surpriseBlocks: [], // Array to hold surprise block objects
-    pipes: [] // Array to hold pipe objects
+    pipes: [], // Array to hold pipe objects
+    mushrooms: [] // Array to hold mushroom items spawned from blocks
 }
 
 
@@ -199,6 +202,8 @@ function loadLevel(levelIndex) {
     player.velocityY = 0;
     player.big = false;
     player.bigTimer = 0;
+    player.invincible = false;
+    player.invincibleTimer = 0;
     player.element.className = ''; // reset player class
 
     //function call below to update player position in DOM
@@ -385,7 +390,8 @@ function clearLevel() {
         enemies: [],    
         coins: [],    
         surpriseBlocks: [],    
-        pipes: []    
+        pipes: [],
+        mushrooms: []
     }   
 } // END of clearLevel function
 
@@ -453,6 +459,18 @@ function update() {
             player.element.classList.remove('big'); // Remove big class to return to normal size
             player.width = 20; // Return to normal width
             player.height = 20; // Return to normal height
+        }
+    }
+    
+    // Handle invincibility timer countdown - decrement timer each frame
+    if (player.invincibleTimer > 0) {
+        player.invincibleTimer--; // Decrement timer by 1 each frame
+        if (player.invincibleTimer <= 0) {
+            // Timer expired - player is no longer invincible
+            player.invincible = false;
+            player.invincibleTimer = 0;
+        } else {
+            player.invincible = true; // Keep invincible while timer is active
         }
     }
     // handles left and right movement
@@ -547,18 +565,25 @@ function update() {
             updateScoreDisplay(); // Update the score display in the UI to reflect the new score
             } else {  
                 // Player hit by enemy - lose a life
-                if (player.big) {
-                    // Shrink player if big
-                    player.big = false;
-                    player.bigTimer = 0;
-                    player.element.classList.remove('big'); // Reset player class to small
-                    player.width = 20;
-                    player.height = 20;
-                    continue; // Skip life loss
-                } else {
-                    // Lose a life 
-                    //loseLife(); // Implement loseLife function to handle life loss   vid_time: 1:37:00 / 2:12:04
-                }    
+                // Only take damage if player is not invincible
+                if (!player.invincible) {
+                    if (player.big) {
+                        // Shrink player if big
+                        player.big = false;
+                        player.bigTimer = 0;
+                        player.element.classList.remove('big'); // Reset player class to small
+                        player.width = 20;
+                        player.height = 20;
+                        // Make player invincible after shrinking
+                        player.invincible = true;
+                        player.invincibleTimer = 120; // 2 seconds of invincibility (120 frames at 60 FPS)
+                        continue; // Skip life loss
+                    } else {
+                        // Lose a life 
+                        loseLife(); // Handle life loss when player collides with enemy horizontally
+                        break; // Exit enemy loop after losing a life to prevent multiple calls
+                    }
+                }
             }
         } // END of player-enemy collision check
     } // END of enemy loop - closes the for (let enemy of gameObjects.enemies) loop
@@ -573,12 +598,30 @@ function update() {
         }
     } // END of coin collection loop - closes the for (let coin of gameObjects.coins) loop
 
+    // mushroom collection detection
+    for (let mushroom of gameObjects.mushrooms) {
+        if (!mushroom.collected && checkCollision(player, mushroom)) {
+            mushroom.collected = true;
+            mushroom.element.remove(); // Remove mushroom from DOM
+            gameState.lives++; // Gain a life when collecting mushroom
+            gameState.score += 150; // Increase score for collecting mushroom
+            updateScoreDisplay(); // Update the score display in the UI to reflect the new score
+            // Remove mushroom from gameObjects array
+            const index = gameObjects.mushrooms.indexOf(mushroom);
+            if (index > -1) {
+                gameObjects.mushrooms.splice(index, 1);
+            }
+            break; // Exit loop after collecting one mushroom
+        }
+    } // END of mushroom collection loop
+
     // surprise block interaction vid_time: 1:39:42 / 2:12:04
     for (let block of gameObjects.surpriseBlocks) {
         // Only trigger if block hasn't been hit, player is moving upward (hitting from below), and player is below the block
         if (!block.hit && player.velocityY < 0 && player.y + player.height > block.y + block.height && checkCollision(player, block)) {
             block.hit = true; // Mark block as hit immediately to prevent multiple triggers in the same collision
             block.element.classList.add('hit'); // Change block pic to hit state pic...
+            spawnItemOnBox(block, block.type); // Spawn item above the block
             
             // Spawn item based on block type
             if (block.type === 'mushroom') {
@@ -654,11 +697,145 @@ function checkCollision(rect1, rect2) {
 }
 
 
-// NEXT FUNCTION TO WRITE
 //spawn item  on surpriseBlock vid_time: 1:58:12 / 2:12:04
-function spawnItemOnBox(type, x, y) {
-    const gameArea = document.getElementById('game-area');
-}
+function spawnItemOnBox(block, type) {
+    const item = document.createElement('div');
+    item.classList.add(type); // type can be 'mushroom' or 'coin', etc
+    item.style.position = 'absolute';
+    item.style.left = block.x + 'px';
+    item.style.top = (block.y - 20) + 'px'; // Spawn above the block
+    document.getElementById('game-area').appendChild(item);
+    
+    // Create item object and add to appropriate gameObjects array
+    const itemObject = {
+        element: item, // DOM element
+        x: block.x,
+        y: block.y - 20,
+        width: 20,
+        height: 20,
+        type: type, // 'mushroom' or 'coin' class, etc...
+        velocityY: 0,
+        collected: false
+    };
+
+    if (type === 'mushroom') {  
+        console.log('Spawning mushroom item...');
+        // Add mushroom to gameObjects array for collision detection
+        gameObjects.mushrooms.push(itemObject);
+        const mushroomInterval = setInterval(() => {
+            // Apply gravity
+            itemObject.velocityY += GRAVITY;
+            
+            // Update position based on velocity
+            itemObject.y += itemObject.velocityY;
+            
+            let grounded = false; // Track if mushroom is on a platform or pipe
+            
+            // Check for collision with platforms to stop falling
+            for (let platform of gameObjects.platforms) {
+                if (checkCollision(itemObject, platform)) {
+                    if (itemObject.velocityY > 0) { // Falling down
+                        itemObject.y = platform.y - itemObject.height; // Align on top of platform
+                        itemObject.velocityY = 0;
+                        grounded = true;
+                        break;
+                    }
+                }
+            }
+            
+            // Check for collision with pipes to stop falling
+            if (!grounded) {
+                for (let pipe of gameObjects.pipes) {
+                    if (checkCollision(itemObject, pipe)) {
+                        if (itemObject.velocityY > 0) { // Falling down
+                            itemObject.y = pipe.y - itemObject.height; // Align on top of pipe
+                            itemObject.velocityY = 0;
+                            grounded = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            // Update mushroom position in DOM
+            updateElementPosition(itemObject.element, itemObject.x, itemObject.y);
+
+            // Stop the interval and fade out mushroom when it lands on a platform or pipe
+            if (grounded) {
+                clearInterval(mushroomInterval);
+                
+                // Wait a few milliseconds before starting fade
+                setTimeout(() => {
+                    // Start fade out animation
+                    item.style.opacity = '0';
+                    
+                    // Remove mushroom from DOM after fade completes
+                    setTimeout(() => {
+                        item.remove();
+                        // Remove mushroom from gameObjects array
+                        const index = gameObjects.mushrooms.indexOf(itemObject);
+                        if (index > -1) {
+                            gameObjects.mushrooms.splice(index, 1);
+                        }
+                    }, 500); // Match the CSS transition duration (0.5s = 500ms)
+                }, 300); // Wait 300ms before starting fade
+            }   
+    }, 16)    } else if (type === 'coin') {
+        console.log('Spawning coin item...');
+        // Add coin to gameObjects array for collision detection
+        gameObjects.coins.push(itemObject);
+        let frames = 0;
+        const coinInterval = setInterval(() => {
+            // Check for collision with player before updating animation
+            if (!itemObject.collected && checkCollision(player, itemObject)) {
+                itemObject.collected = true;
+                itemObject.element.remove(); // Remove coin from DOM
+                gameState.score += 50; // Increase score for collecting coin
+                updateScoreDisplay(); // Update the score display in the UI to reflect the new score
+                // Remove coin from gameObjects array
+                const index = gameObjects.coins.indexOf(itemObject);
+                if (index > -1) {
+                    gameObjects.coins.splice(index, 1);
+                }
+                clearInterval(coinInterval); // Stop animation when collected
+                return; // Exit interval callback
+            }
+            
+            if (frames < 30) { // Move up for 30 frames
+                itemObject.y -= 1; // Move up
+                item.style.top = itemObject.y + 'px';
+                frames++;
+            } else if (frames >= 30 && frames < 180) { // Spin for 150 frames
+                // Simple spin animation by toggling visibility
+                item.style.visibility = (frames % 10 < 5) ? 'visible' : 'hidden'; //frames % 10 creates a repeating 0–9 cycle
+                frames++;                                                         // The first half of that cycle (0–4) is treated differently than the second half (5–9).  
+            } else
+                if (frames >= 180) {
+                    clearInterval(coinInterval);
+                    // Remove coin from gameObjects array if not already collected
+                    if (!itemObject.collected) {
+                        const index = gameObjects.coins.indexOf(itemObject);
+                        if (index > -1) {
+                            gameObjects.coins.splice(index, 1);
+                        }
+                    }
+                    item.remove(); // Remove coin from DOM after animation        
+                }
+             updateElementPosition(itemObject.element, itemObject.x, itemObject.y);
+        }, 60); // Approx. 60 FPS
+        
+    } // END of coin item type check
+    
+    
+    // Additional logic for item behavior can be added here
+
+} // END of spawnItemOnBox function vid_time: 1:59:45 / 2:12:04
+
+
+
+
+
+
 
 
 // function to handle losing a life vid_time: 1:48:24 / 2:12:04
@@ -677,6 +854,9 @@ function loseLife() {
         player.element.classList.remove('big'); // reset player class
         player.width = 20; // reset player width
         player.height = 20; // reset player height
+        // Make player invincible after losing a life
+        player.invincible = true;
+        player.invincibleTimer = 120; // 2 seconds of invincibility (120 frames at 60 FPS)
         updateElementPosition(player.element, player.x, player.y); // Update player position in DOM
     }
 } // END of loseLife function
@@ -700,6 +880,8 @@ function restartGame() {
     gameState.keys = {};
     player.big = false;
     player.bigTimer = 0;
+    player.invincible = false;
+    player.invincibleTimer = 0;
     player.element.classList.remove('big'); // reset player class
     player.width = 20; // reset player width
     player.height = 20; // reset player height
