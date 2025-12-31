@@ -132,9 +132,45 @@ const levels = [
             { x: 750, y: 320} // pipe
         ] // Array to hold pipe objects
 
-    } // END of level 2        
+    }, // END of level 2        
+    // --------------------------------------------------------------------------------------------------------------------------
+    // Level 3 
+    {
+        platforms: [ // 8 blue platforms
+
+            { x: 0, y: 360, width: 200, height: 40, type: 'blue' }, // Ground platform
+             { x: 300, y: 360, width: 200, height: 40, type: 'blue' }, // Ground platform
+              { x: 600, y: 360, width: 200, height: 40, type: 'blue' }, // Ground platform
+               { x: 150, y: 300, width: 200, height: 40, type: 'blue' }, // Ground platform
+                { x: 250, y: 280, width: 200, height: 40, type: 'blue' }, // Ground platform
+                 { x: 350, y: 80, width: 200, height: 40, type: 'blue' }, // Ground platform
+                  { x: 450, y: 240, width: 200, height: 40, type: 'blue' }, // Ground platform
+                   { x: 550, y: 100, width: 200, height: 40, type: 'blue' } // Ground platform
+        ],
+        enemies: [
+            { x: 350, y: 310, type: 'birds' }, // birds enemy (y: 360 - 50 = 310 to sit on platform)
+            { x: 750, y: 210, type: 'birds' },  // birds enemy (y: 360 - 50 = 310 to sit on platform)
+            { x: 570, y: 230, type: 'birds' }  // birds enemy (y: 280 - 50 = 230 to sit on platform)
+        ], // Array to hold enemy objects
+        coins: [
+            { x: 160, y: 260}, // coin
+            { x: 560, y: 70}, // coin
+            { x: 460, y: 160}, // coin
+            { x: 660, y: 260}, // coin
+            { x: 860, y: 260}, // coin
+        ], // Array to hold coin objects
+        surpriseBlocks: [
+            { x: 200, y: 260, type: 'mushroom' }, // mushroom surprise block
+            { x: 500, y: 220, type: 'coin' } // coin surprise block
+        ], // Array to hold surprise block objects
+        pipes: [
+            { x: 750, y: 320} // pipe
+        ] // Array to hold pipe objects
+
+    } // END of level 3        
     // --------------------------------------------------------------------------------------------------------------------------
     // Additional levels can be added here
+
 ] // END of levels array
 
 /**
