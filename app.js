@@ -149,8 +149,47 @@ const levels = [
         ],
         enemies: [
             { x: 350, y: 310, type: 'birds' }, // birds enemy (y: 360 - 50 = 310 to sit on platform)
-            { x: 750, y: 210, type: 'birds' },  // birds enemy (y: 360 - 50 = 310 to sit on platform)
-            { x: 570, y: 230, type: 'birds' }  // birds enemy (y: 280 - 50 = 230 to sit on platform)
+            { x: 750, y: 410, type: 'birds' },  // birds enemy (y: 360 - 50 = 310 to sit on platform)
+            { x: 110, y: 340, type: 'birds' },
+            { x: 220, y: 101, type: 'birds' }
+
+        ], // Array to hold enemy objects
+        coins: [
+            { x: 160, y: 260}, // coin
+            { x: 560, y: 70}, // coin
+            { x: 460, y: 160}, // coin
+            { x: 660, y: 260}, // coin
+            { x: 860, y: 260}, // coin
+        ], // Array to hold coin objects 
+        surpriseBlocks: [
+            { x: 200, y: 260, type: 'mushroom' }, // mushroom surprise block
+            { x: 500, y: 220, type: 'coin' } // coin surprise block
+        ], // Array to hold surprise block objects
+        pipes: [
+            { x: 750, y: 320} // pipe
+        ] // Array to hold pipe objects
+
+    }, // END of level 3        
+    // --------------------------------------------------------------------------------------------------------------------------
+        // Level 4
+    {
+        platforms: [ // 8 blue platforms
+
+            { x: 0, y: 360, width: 200, height: 40, type: 'lvl_4_stone' }, // level 4 (stone) platforms
+             { x: 300, y: 360, width: 200, height: 40, type: 'lvl_4_stone' },
+              { x: 600, y: 360, width: 200, height: 40, type: 'lvl_4_stone' },
+               { x: 150, y: 300, width: 200, height: 40, type: 'lvl_4_stone' },
+                { x: 250, y: 280, width: 200, height: 40, type: 'lvl_4_stone' },
+                 { x: 350, y: 80, width: 200, height: 40, type: 'lvl_4_stone' },
+                  { x: 450, y: 240, width: 200, height: 40, type: 'lvl_4_stone' },
+                   { x: 550, y: 100, width: 200, height: 40, type: 'lvl_4_stone' }
+        ],
+        enemies: [
+            { x: 350, y: 310, type: 'fish' }, // fish enemy (y: 360 - 50 = 310 to sit on platform)
+            { x: 750, y: 410, type: 'fish' },  // fish enemy (y: 360 - 50 = 310 to sit on platform)
+            { x: 110, y: 340, type: 'fish' },
+            { x: 220, y: 101, type: 'fish' }
+
         ], // Array to hold enemy objects
         coins: [
             { x: 160, y: 260}, // coin
@@ -167,7 +206,7 @@ const levels = [
             { x: 750, y: 320} // pipe
         ] // Array to hold pipe objects
 
-    } // END of level 3        
+    } // END of level 4
     // --------------------------------------------------------------------------------------------------------------------------
     // Additional levels can be added here
 
@@ -283,6 +322,15 @@ function loadLevel(levelIndex) {
 
     // Similar creation loops for enemies, coins, surpriseBlocks, and pipes can be added here
     // Create enemies
+    // Enemy dimensions map to match CSS definitions
+    const enemyDimensions = {
+        'brown': { width: 70, height: 70 },
+        'purple': { width: 20, height: 20 },
+        'birds': { width: 120, height: 100 },
+        'fish': { width: 120, height: 100 },
+        'spider': { width: 70, height: 70 } // if spider type exists
+    };
+    
     level.enemies.forEach((enemyData, index) => {
         const enemy = myCreateElement('div', `enemy ${enemyData.type}`, {  
             left: enemyData.x + 'px',       
@@ -290,12 +338,16 @@ function loadLevel(levelIndex) {
         });
         enemy.textContent = '';
         gameArea.appendChild(enemy);
+        
+        // Get dimensions for this enemy type, default to 50x50 if not found
+        const dimensions = enemyDimensions[enemyData.type] || { width: 50, height: 50 };
+        
         gameObjects.enemies.push({ // add enemy object to gameObjects.enemies array
             element: enemy, 
             x: enemyData.x,
             y: enemyData.y,
-            width: 50, // assuming fixed width for enemies
-            height: 50, // assuming fixed height for enemies
+            width: dimensions.width,
+            height: dimensions.height,
             direction: -1, // 1 for right, -1 for left
             speed: ENEMY_SPEED,
             id: 'enemy-' + index,

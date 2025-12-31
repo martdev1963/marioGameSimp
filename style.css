@@ -95,6 +95,15 @@ overflow: hidden;
     background-repeat: repeat;
 }
 
+/* this asset is still from 1st asset folder */
+.platform.lvl_4_stone {
+    background-image: url('img/pics/Stone_Tileset.png');
+    position: absolute;
+    background-size: 20px 20px;
+    background-repeat: repeat;
+}
+
+
 .enemy.brown {
     background-image: url('img/pics/Spider_1.png');
     background-size: cover;
@@ -128,6 +137,35 @@ overflow: hidden;
 
 .enemy.birds {
     background-image: url('img/pics/Bird_1.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    width: 120px;
+    height: 100px;
+    text-indent: -9999px;
+    overflow: hidden;
+    font-size: 0;
+    line-height: 0;
+}
+
+.enemy.fish {
+    background-image: url('img/pics/Fish_1.png');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+    width: 120px;
+    height: 100px;
+    text-indent: -9999px;
+    overflow: hidden;
+    font-size: 0;
+    line-height: 0;
+}
+
+
+.enemy.dragon {
+    background-image: url('img/pics/MudWyvern_1.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;
     background-position: center;
